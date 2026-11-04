@@ -1,0 +1,43 @@
+---
+import { formatDate, postUrl, categoryUrl, excerpt, type Post } from '../lib/blog';
+
+interface Props {
+  posts: Post[];
+  currentPage?: number;
+  lastPage?: number;
+}
+const { posts, currentPage = 1, lastPage = 1 } = Astro.props;
+const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/page/${n}/`);
+---
+{posts.length === 0 && <p>記事はまだありません。</p>}
+
+{posts.map((p) => (
+  <article class="item">
+    <p class="meta">{formatDate(p.data.date)}</p>
+    <h2><a href={postUrl(p)}>{p.data.title}</a></h2>
+    <p class="excerpt">{excerpt(p)}</p>
+    <p class="meta"><a href={categoryUrl(p.data.category)}>{p.data.category}</a></p>
+  </article>
+))}
+
+{lastPage > 1 && (
+  <nav class="pager" aria-label="ページ送り">
+    {currentPage > 1 && <a href={pageUrl(currentPage - 1)}>« 前へ</a>}
+    {Array.from({ length: lastPage }, (_, i) => i + 1).map((n) =>
+      n === currentPage ? <span>{n}</span> : <a href={pageUrl(n)}>{n}</a>
+    )}
+    {currentPage < lastPage && <a href={pageUrl(currentPage + 1)}>次へ »</a>}
+  </nav>
+)}
+
+<style>
+  .item {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .item h2 { font-size: 1.15rem; margin: 0 0 6px; }
+  .item p { margin: 0 0 6px; }
+  .pager { display: flex; gap: 12px; flex-wrap: wrap; }
+  .pager span { font-weight: bold; }
+</style>

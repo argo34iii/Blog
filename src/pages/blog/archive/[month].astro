@@ -1,0 +1,24 @@
+---
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import PostList from '../../../components/PostList.astro';
+import { getPosts, monthKey, monthLabel } from '../../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const months = [...new Set(posts.map((p) => monthKey(p.data.date)))];
+  return months.map((month) => ({
+    params: { month },
+    props: { month, posts: posts.filter((p) => monthKey(p.data.date) === month) },
+  }));
+}
+
+const { month, posts } = Astro.props;
+---
+<BlogLayout title={monthLabel(month)}>
+  <h1 class="list-title">{monthLabel(month)}</h1>
+  <PostList posts={posts} />
+</BlogLayout>
+
+<style>
+  .list-title { font-size: 1.1rem; margin-top: 0; }
+</style>

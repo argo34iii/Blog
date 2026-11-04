@@ -1,18 +1,11 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { getCollection } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, PER_PAGE } from '../../lib/blog';
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
-const fmt = (d) => d.toISOString().slice(0, 10);
+const posts = await getPosts();
+const lastPage = Math.max(1, Math.ceil(posts.length / PER_PAGE));
 ---
-<Base title="ブログ - gmii">
-  <p><a href="/">← トップ</a></p>
-  <h1>ブログ</h1>
-  <ul>
-    {posts.map((p) => (
-      <li>{fmt(p.data.date)} <a href={`/blog/${p.id}/`}>{p.data.title}</a></li>
-    ))}
-  </ul>
-</Base>
+<BlogLayout>
+  <PostList posts={posts.slice(0, PER_PAGE)} currentPage={1} lastPage={lastPage} />
+</BlogLayout>

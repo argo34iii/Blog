@@ -1,0 +1,52 @@
+---
+import {
+  getPosts, postUrl, categoryUrl, archiveUrl,
+  monthKey, monthLabel, countBy,
+} from '../lib/blog';
+
+const posts = await getPosts();
+const recent = posts.slice(0, 5);
+const categories = countBy(posts, (p) => p.data.category)
+  .sort((a, b) => a[0].localeCompare(b[0], 'ja'));
+const months = countBy(posts, (p) => monthKey(p.data.date))
+  .sort((a, b) => b[0].localeCompare(a[0]));
+---
+<aside class="sidebar">
+  <section>
+    <h2>プロフィール</h2>
+    <p><strong>gmii</strong><br />ゲームプログラマ</p>
+    <p><a href="/">ホームページ</a></p>
+  </section>
+
+  <section>
+    <h2>最近の記事</h2>
+    <ul>{recent.map((p) => <li><a href={postUrl(p)}>{p.data.title}</a></li>)}</ul>
+  </section>
+
+  <section>
+    <h2>カテゴリー</h2>
+    <ul>{categories.map(([c, n]) => <li><a href={categoryUrl(c)}>{c}</a> ({n})</li>)}</ul>
+  </section>
+
+  <section>
+    <h2>アーカイブ</h2>
+    <ul>{months.map(([k, n]) => <li><a href={archiveUrl(k)}>{monthLabel(k)}</a> ({n})</li>)}</ul>
+  </section>
+
+  <section>
+    <p><a href="/blog/rss.xml">RSS</a></p>
+  </section>
+</aside>
+
+<style>
+  .sidebar { font-size: 0.9rem; }
+  h2 {
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 4px;
+    margin: 0 0 8px;
+  }
+  section { margin-bottom: 28px; }
+  ul { margin: 0; padding-left: 1.2em; }
+  p { margin: 0 0 8px; }
+</style>

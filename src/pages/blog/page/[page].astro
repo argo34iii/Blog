@@ -1,0 +1,23 @@
+---
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import PostList from '../../../components/PostList.astro';
+import { getPosts, PER_PAGE } from '../../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const lastPage = Math.ceil(posts.length / PER_PAGE);
+  // 1ページ目は /blog/ なので 2 ページ目から作る
+  return Array.from({ length: Math.max(0, lastPage - 1) }, (_, i) => {
+    const page = i + 2;
+    return {
+      params: { page: String(page) },
+      props: { posts: posts.slice((page - 1) * PER_PAGE, page * PER_PAGE), page, lastPage },
+    };
+  });
+}
+
+const { posts, page, lastPage } = Astro.props;
+---
+<BlogLayout title={`${page}ページ目`}>
+  <PostList posts={posts} currentPage={page} lastPage={lastPage} />
+</BlogLayout>

@@ -1,0 +1,45 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { render } from 'astro:content';
+import { getPosts, formatDate, postUrl, categoryUrl } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  // posts は新しい順。newer = ひとつ新しい記事, older = ひとつ古い記事
+  return posts.map((post, i) => ({
+    params: { id: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+---
+<BlogLayout title={post.data.title}>
+  <article>
+    <p class="meta">{formatDate(post.data.date)}</p>
+    <h1 class="post-title">{post.data.title}</h1>
+    <div class="post-body"><Content /></div>
+    <p class="meta">カテゴリー: <a href={categoryUrl(post.data.category)}>{post.data.category}</a></p>
+  </article>
+
+  <nav class="post-nav">
+    <div>{older && <a href={postUrl(older)}>« {older.data.title}</a>}</div>
+    <div>{newer && <a href={postUrl(newer)}>{newer.data.title} »</a>}</div>
+  </nav>
+</BlogLayout>
+
+<style>
+  .post-title { font-size: 1.5rem; margin: 0 0 16px; }
+  .post-body { margin-bottom: 24px; }
+  .post-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 0.9rem;
+  }
+  .post-nav div:last-child { text-align: right; }
+</style>

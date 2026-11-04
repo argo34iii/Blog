@@ -1,0 +1,66 @@
+---
+import Base from './Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { BLOG_NAME } from '../lib/blog';
+
+const { title } = Astro.props;
+const pageTitle = title ? `${title} - ${BLOG_NAME}` : BLOG_NAME;
+---
+<Base title={pageTitle} wide>
+  <link slot="head" rel="alternate" type="application/rss+xml" title={BLOG_NAME} href="/blog/rss.xml" />
+  <header class="blog-header">
+    <a class="blog-title" href="/blog/">{BLOG_NAME}</a>
+    <nav><a href="/">トップ</a></nav>
+  </header>
+
+  <div class="blog-body">
+    <main id="content">
+      <slot />
+    </main>
+    <Sidebar />
+  </div>
+
+  <footer class="blog-footer">
+    <p>©{new Date().getFullYear()} gmii</p>
+    <p><a href="#">トップへ戻る</a></p>
+  </footer>
+</Base>
+
+<style is:global>
+  .blog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .blog-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .blog-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 40px;
+  }
+  @media (max-width: 760px) {
+    .blog-body { grid-template-columns: minmax(0, 1fr); }
+  }
+  .blog-footer {
+    margin-top: 48px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .meta a { color: inherit; }
+</style>

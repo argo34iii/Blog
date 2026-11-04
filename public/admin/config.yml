@@ -24,8 +24,9 @@ collections:
     create: true
     # URLは投稿日時から自動で付ける（例: /blog/20261104-2230/）
     slug: "{{year}}{{month}}{{day}}-{{hour}}{{minute}}"
-    sortable_fields: [date, title]
+    sortable_fields: [date, title, category]
     fields:
       - { name: title, label: タイトル, widget: string }
       - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - { name: category, label: カテゴリー, widget: string, default: 雑記 }
       - { name: body, label: 本文, widget: markdown }
