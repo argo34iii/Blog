@@ -1,0 +1,178 @@
+---
+// 記事ごとの投票ボタンとコメント欄。データは /api/posts/<slug> から読み書きする。
+interface Props { slug: string }
+const { slug } = Astro.props;
+
+const reactions = [
+  { kind: 'good', emoji: '👍', label: 'いいね' },
+  { kind: 'lol', emoji: '😂', label: '笑った' },
+  { kind: 'wow', emoji: '😮', label: 'へぇ' },
+  { kind: 'sad', emoji: '😢', label: 'しんみり' },
+  { kind: 'hmm', emoji: '🤔', label: 'うーん' },
+];
+---
+<section class="feedback" data-slug={slug}>
+  <h2>この記事どうでした？</h2>
+  <div class="reactions">
+    {reactions.map((r) => (
+      <button type="button" class="reaction" data-kind={r.kind} aria-pressed="false">
+        <span class="emoji" aria-hidden="true">{r.emoji}</span>
+        <span>{r.label}</span>
+        <span class="count">0</span>
+      </button>
+    ))}
+  </div>
+
+  <h2>コメント</h2>
+  <ol class="comments"><li class="empty">読み込み中…</li></ol>
+
+  <form class="comment-form">
+    <label>名前（空欄なら「名無しさん」）
+      <input name="name" maxlength="30" autocomplete="nickname" />
+    </label>
+    <label class="trap" aria-hidden="true">website
+      <input name="website" tabindex="-1" autocomplete="off" />
+    </label>
+    <label>コメント
+      <textarea name="body" rows="4" maxlength="2000" required></textarea>
+    </label>
+    <button type="submit">コメントする</button>
+    <p class="status" role="status"></p>
+  </form>
+</section>
+
+<script>
+  const fmt = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo', year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+
+  function voterId() {
+    try {
+      let id = localStorage.getItem('voter-id');
+      if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('voter-id', id);
+      }
+      return id;
+    } catch {
+      return crypto.randomUUID();
+    }
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('.feedback')) {
+    const api = `/api/posts/${root.dataset.slug}`;
+    const voter = voterId();
+    const list = root.querySelector('.comments')!;
+    const form = root.querySelector<HTMLFormElement>('.comment-form')!;
+    const status = root.querySelector('.status')!;
+    const headers = { 'content-type': 'application/json', 'x-voter': voter };
+
+    function render(state) {
+      for (const btn of root.querySelectorAll<HTMLButtonElement>('.reaction')) {
+        const kind = btn.dataset.kind!;
+        btn.querySelector('.count')!.textContent = String(state.reactions[kind] ?? 0);
+        btn.setAttribute('aria-pressed', String(state.mine.includes(kind)));
+      }
+      list.replaceChildren();
+      if (state.comments.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'empty';
+        li.textContent = 'まだコメントはありません。';
+        list.append(li);
+      }
+      for (const c of state.comments) {
+        const li = document.createElement('li');
+        const head = document.createElement('p');
+        head.className = 'comment-head';
+        const name = document.createElement('strong');
+        name.textContent = c.name;
+        head.append(name, ` ${fmt.format(new Date(c.created_at))}`);
+        const body = document.createElement('p');
+        body.className = 'comment-body';
+        body.textContent = c.body;
+        li.append(head, body);
+        list.append(li);
+      }
+    }
+
+    async function call(path, body?) {
+      const res = await fetch(api + path, body
+        ? { method: 'POST', headers, body: JSON.stringify(body) }
+        : { headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || '通信に失敗しました');
+      return data;
+    }
+
+    call('').then(render).catch(() => {
+      list.innerHTML = '<li class="empty">コメントを読み込めませんでした。</li>';
+    });
+
+    root.querySelector('.reactions')!.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.reaction');
+      if (!btn) return;
+      btn.disabled = true;
+      try {
+        render(await call('/reactions', { kind: btn.dataset.kind }));
+      } catch {
+        // 失敗しても表示はそのまま
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const submit = form.querySelector('button')!;
+      submit.disabled = true;
+      status.textContent = '送信中…';
+      try {
+        render(await call('/comments', {
+          name: fd.get('name'), body: fd.get('body'), website: fd.get('website'),
+        }));
+        form.querySelector('textarea')!.value = '';
+        status.textContent = 'コメントしました。';
+      } catch (err) {
+        status.textContent = (err as Error).message;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .feedback {
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  h2 { font-size: 1.05rem; margin: 16px 0 10px; }
+  .reactions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .reaction {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: var(--bg); color: var(--text);
+    font: inherit; font-size: 0.9rem; cursor: pointer;
+  }
+  .reaction[aria-pressed='true'] { border-color: var(--link); background: #eef0ff; }
+  .reaction .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .comments { list-style: none; padding: 0; margin: 0 0 20px; }
+  .comments :global(li) { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .comments :global(.empty) { color: var(--muted); border: none; }
+  .comments :global(.comment-head) { margin: 0; font-size: 0.85rem; color: var(--muted); }
+  .comments :global(.comment-head strong) { color: var(--text); }
+  .comments :global(.comment-body) { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .comment-form { display: grid; gap: 10px; }
+  .comment-form label { display: grid; gap: 4px; font-size: 0.9rem; }
+  .comment-form input, .comment-form textarea {
+    font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px;
+    width: 100%; box-sizing: border-box;
+  }
+  .comment-form button { justify-self: start; font: inherit; padding: 6px 16px; cursor: pointer; }
+  .trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .status { margin: 0; font-size: 0.85rem; color: var(--muted); min-height: 1.5em; }
+</style>

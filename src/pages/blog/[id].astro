@@ -1,6 +1,7 @@
 ---
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import { render } from 'astro:content';
+import Feedback from '../../components/Feedback.astro';
 import { getPosts, formatDate, postUrl, categoryUrl } from '../../lib/blog';
 
 export async function getStaticPaths() {
@@ -22,6 +23,8 @@ const { Content } = await render(post);
     <div class="post-body"><Content /></div>
     <p class="meta">カテゴリー: <a href={categoryUrl(post.data.category)}>{post.data.category}</a></p>
   </article>
+
+  <Feedback slug={post.id} />
 
   <nav class="post-nav">
     <div>{older && <a href={postUrl(older)}>« {older.data.title}</a>}</div>
