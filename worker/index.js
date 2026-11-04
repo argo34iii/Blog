@@ -1,7 +1,8 @@
 // /api/* だけをここで処理し、それ以外は静的サイト（dist）をそのまま返す。
 // コメントと投票は D1（Cloudflare の無料DB）に保存する。
 
-export const REACTIONS = ['good', 'lol', 'wow', 'sad', 'hmm'];
+// Feedback.astro のボタンと同じ並び
+export const REACTIONS = ['useful', 'moved', 'alive', 'motto', 'someday'];
 
 const SLUG_RE = /^[A-Za-z0-9_-]{1,100}$/;
 const MAX_NAME = 30;

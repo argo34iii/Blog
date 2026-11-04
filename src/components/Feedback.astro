@@ -4,11 +4,11 @@ interface Props { slug: string }
 const { slug } = Astro.props;
 
 const reactions = [
-  { kind: 'good', emoji: '👍', label: 'いいね' },
-  { kind: 'lol', emoji: '😂', label: '笑った' },
-  { kind: 'wow', emoji: '😮', label: 'へぇ' },
-  { kind: 'sad', emoji: '😢', label: 'しんみり' },
-  { kind: 'hmm', emoji: '🤔', label: 'うーん' },
+  { kind: 'useful', emoji: '💡', label: '役に立った' },
+  { kind: 'moved', emoji: '😭', label: '感動した' },
+  { kind: 'alive', emoji: '🔥', label: '生きる気力が湧いた' },
+  { kind: 'motto', emoji: '📜', label: '座右の銘にしたい' },
+  { kind: 'someday', emoji: '🍵', label: 'そういう日もある' },
 ];
 ---
 <section class="feedback" data-slug={slug}>
