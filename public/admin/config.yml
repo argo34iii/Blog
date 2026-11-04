@@ -1,0 +1,31 @@
+backend:
+  name: github
+  repo: argo34iii/Blog
+  branch: main
+
+# 画像の置き場所（アップロード時にWebPへ変換・縮小）
+media_folder: public/images
+public_folder: /images
+media_libraries:
+  default:
+    config:
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 1600
+          height: 1600
+
+collections:
+  - name: blog
+    label: ブログ
+    label_singular: 記事
+    folder: src/content/blog
+    create: true
+    # URLは投稿日時から自動で付ける（例: /blog/20261104-2230/）
+    slug: "{{year}}{{month}}{{day}}-{{hour}}{{minute}}"
+    sortable_fields: [date, title]
+    fields:
+      - { name: title, label: タイトル, widget: string }
+      - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - { name: body, label: 本文, widget: markdown }
