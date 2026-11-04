@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const fmt = (d) => d.toISOString().slice(0, 10);
+---
+<Base title="ブログ - gmii">
+  <p><a href="/">← トップ</a></p>
+  <h1>ブログ</h1>
+  <ul>
+    {posts.map((p) => (
+      <li>{fmt(p.data.date)} <a href={`/blog/${p.id}/`}>{p.data.title}</a></li>
+    ))}
+  </ul>
+</Base>
