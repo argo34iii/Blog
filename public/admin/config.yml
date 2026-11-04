@@ -29,4 +29,5 @@ collections:
       - { name: title, label: タイトル, widget: string }
       - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
       - { name: category, label: カテゴリー, widget: string, default: 雑記 }
-      - { name: body, label: 本文, widget: markdown }
+      # raw（テキスト入力）を先頭にして、改行・空行を書いたとおりに保存する
+      - { name: body, label: 本文, widget: markdown, modes: [raw, rich_text] }
