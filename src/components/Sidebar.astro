@@ -32,10 +32,6 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
     <h2>アーカイブ</h2>
     <ul>{months.map(([k, n]) => <li><a href={archiveUrl(k)}>{monthLabel(k)}</a> ({n})</li>)}</ul>
   </section>
-
-  <section>
-    <p><a href="/blog/rss.xml">RSS</a></p>
-  </section>
 </aside>
 
 <style>
