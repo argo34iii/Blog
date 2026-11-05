@@ -3,7 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 export type Post = CollectionEntry<'blog'>;
 
 export const SITE_NAME = 'gmii';
-export const BLOG_NAME = 'gmiiのブログ';
+export const BLOG_NAME = 'デ';
 export const PER_PAGE = 10;
 
 export async function getPosts(): Promise<Post[]> {
