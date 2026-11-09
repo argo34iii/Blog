@@ -25,8 +25,11 @@ collections:
     # URLは投稿日時から自動で付ける（例: /blog/20261104-2230/）
     slug: "{{year}}{{month}}{{day}}-{{hour}}{{minute}}"
     sortable_fields: [date, title, category]
+    # 管理画面の記事一覧での表示（タイトルが空でも日付で見分けられるように）
+    summary: "{{date}}　{{title}}"
     fields:
-      - { name: title, label: タイトル, widget: string }
+      # 空欄のままなら、サイト側で「日記　YYYYMMDD」（日付欄の日付）になる
+      - { name: title, label: タイトル（空欄で「日記　日付」）, widget: string, required: false }
       - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
       - { name: category, label: カテゴリー, widget: string, default: 雑記 }
       # raw（テキスト入力）を先頭にして、改行・空行を書いたとおりに保存する
