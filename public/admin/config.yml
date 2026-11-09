@@ -30,4 +30,19 @@ collections:
       - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
       - { name: category, label: カテゴリー, widget: string, default: 雑記 }
       # raw（テキスト入力）を先頭にして、改行・空行を書いたとおりに保存する
-      - { name: body, label: 本文, widget: markdown, modes: [raw, rich_text] }
+      - name: body
+        label: 本文
+        widget: markdown
+        modes: [raw, rich_text]
+        # 新規作成時に本文へ入るテンプレート
+        default: |+
+          日記。
+
+          朝飯: 
+          昼飯: 
+          夜飯: 
+
+          退勤時間: 
+
+
+
