@@ -44,3 +44,13 @@ export function countBy<T>(items: T[], key: (t: T) => string): [string, number][
   for (const it of items) map.set(key(it), (map.get(key(it)) ?? 0) + 1);
   return [...map.entries()];
 }
+
+// 記事のサムネイル: 本文で最初に出てくる画像。なければ「画像」欄の1枚目。どちらもなければ undefined
+const MD_IMAGE = /!\[[^\]]*\]\(\s*<?([^)\s>]+)/;
+const isUsableSrc = (s: unknown): s is string => typeof s === 'string' && /^(\/|https?:\/\/)/.test(s);
+
+export function thumbnail(p: Post): string | undefined {
+  const fromBody = (p.body ?? '').match(MD_IMAGE)?.[1];
+  if (isUsableSrc(fromBody)) return fromBody;
+  return p.data.images.find(isUsableSrc);
+}

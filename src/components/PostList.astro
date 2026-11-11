@@ -1,5 +1,5 @@
 ---
-import { formatDate, postUrl, categoryUrl, excerpt, type Post } from '../lib/blog';
+import { formatDate, postUrl, categoryUrl, excerpt, thumbnail, type Post } from '../lib/blog';
 
 interface Props {
   posts: Post[];
@@ -11,14 +11,24 @@ const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/page/${n}/`);
 ---
 {posts.length === 0 && <p>記事はまだありません。</p>}
 
-{posts.map((p) => (
-  <article class="item">
-    <p class="meta">{formatDate(p.data.date)}</p>
-    <h2><a href={postUrl(p)}>{p.data.title}</a></h2>
-    <p class="excerpt">{excerpt(p)}</p>
-    <p class="meta"><a href={categoryUrl(p.data.category)}>{p.data.category}</a></p>
-  </article>
-))}
+{posts.map((p) => {
+  const thumb = thumbnail(p);
+  return (
+    <article class:list={['item', { 'has-thumb': thumb }]}>
+      <div class="text">
+        <p class="meta">{formatDate(p.data.date)}</p>
+        <h2><a href={postUrl(p)}>{p.data.title}</a></h2>
+        <p class="excerpt">{excerpt(p)}</p>
+        <p class="meta"><a href={categoryUrl(p.data.category)}>{p.data.category}</a></p>
+      </div>
+      {thumb && (
+        <a class="thumb" href={postUrl(p)} tabindex="-1" aria-hidden="true">
+          <img src={thumb} alt="" loading="lazy" decoding="async" />
+        </a>
+      )}
+    </article>
+  );
+})}
 
 {lastPage > 1 && (
   <nav class="pager" aria-label="ページ送り">
@@ -35,6 +45,23 @@ const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/page/${n}/`);
     padding-bottom: 20px;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--line);
+  }
+  .item.has-thumb {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px;
+    gap: 16px;
+    align-items: start;
+  }
+  .thumb {
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--line);
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (max-width: 480px) {
+    .item.has-thumb { grid-template-columns: minmax(0, 1fr) 96px; gap: 12px; }
   }
   .item h2 { font-size: 1.15rem; margin: 0 0 6px; }
   .item p { margin: 0 0 6px; }
