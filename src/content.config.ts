@@ -12,6 +12,8 @@ const blog = defineCollection({
       title: z.string().nullish(),
       date: z.coerce.date(),
       category: z.string().default('雑記'),
+      // 管理画面の「画像」欄。表示は remark-post-images.mjs が行う
+      images: z.array(z.string()).nullish().transform((v) => v ?? []),
     })
     .transform((d) => ({ ...d, title: d.title?.trim() || `日記　${ymd(d.date)}` })),
 });

@@ -35,6 +35,8 @@ const { Content } = await render(post);
 <style>
   .post-title { font-size: 1.5rem; margin: 0 0 16px; }
   .post-body { margin-bottom: 24px; }
+  .post-body :global(.post-image) { display: block; max-width: 100%; height: auto; margin: 12px 0; }
+  .post-body :global(.post-images) { margin-top: 24px; }
   .post-nav {
     display: flex;
     justify-content: space-between;
