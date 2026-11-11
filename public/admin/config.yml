@@ -32,13 +32,13 @@ collections:
       - { name: title, label: タイトル（空欄で「日記　日付」）, widget: string, required: false }
       - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
       - { name: category, label: カテゴリー, widget: string, default: 雑記 }
-      # ボタンから追加するだけで記事に載る。本文に [画像1] と書けばその位置、書かなければ記事の最後
-      - name: images
-        label: 画像（本文に[画像1]と書くとその位置に、書かなければ記事の最後に表示）
-        label_singular: 画像
-        widget: list
+      # 本文ツールバーの画像ボタン（photo.js）で追加した画像。記事の日付のフォルダに保存される
+      - name: uploads
+        label: 画像
+        widget: photo-uploads
         required: false
-        field: { name: image, label: 画像, widget: image }
+        media_folder: /public/images/{{year}}{{month}}{{day}}
+        public_folder: /images/{{year}}{{month}}{{day}}
       # raw（テキスト入力）を先頭にして、改行・空行を書いたとおりに保存する
       - name: body
         label: 本文
