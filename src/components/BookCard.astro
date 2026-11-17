@@ -1,0 +1,43 @@
+---
+// 本の感想記事の冒頭に出す、書名・著者・評価・表紙のカード
+import { stars } from '../lib/blog';
+
+interface Props {
+  book: { title: string; author?: string; rating?: number; cover?: string };
+}
+const { book } = Astro.props;
+---
+<aside class="book-card">
+  {book.cover && <img src={book.cover} alt="" loading="lazy" decoding="async" />}
+  <div>
+    <p class="label">📚 読んだ本</p>
+    <p class="title">{book.title}</p>
+    {book.author && <p class="author">{book.author}</p>}
+    {book.rating && <p class="rating" aria-label={`評価 ${book.rating} / 5`}>{stars(book.rating)}</p>}
+  </div>
+</aside>
+
+<style>
+  .book-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 12px;
+    margin: 0 0 20px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  img {
+    width: 80px;
+    flex: none;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 3px;
+    background: var(--line);
+  }
+  p { margin: 0; }
+  .label { font-size: 0.8rem; color: var(--muted); }
+  .title { font-weight: bold; font-size: 1.05rem; }
+  .author { font-size: 0.9rem; color: var(--muted); }
+  .rating { color: #e0a000; letter-spacing: 2px; }
+</style>

@@ -23,7 +23,7 @@ const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/page/${n}/`);
         </a>
       )}
       <p class="excerpt">{excerpt(p)}</p>
-      <p class="meta"><a href={categoryUrl(p.data.category)}>{p.data.category}</a></p>
+      <p class="meta cats">{p.data.categories.map((c) => <a href={categoryUrl(c)}>{c}</a>)}</p>
     </article>
   );
 })}
@@ -56,6 +56,7 @@ const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/page/${n}/`);
   }
   .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .item h2 { font-size: 1.15rem; margin: 0 0 6px; }
+  .cats { display: flex; flex-wrap: wrap; gap: 0 10px; }
   .item p { margin: 0 0 6px; }
   .pager { display: flex; gap: 12px; flex-wrap: wrap; }
   .pager span { font-weight: bold; }

@@ -1,0 +1,91 @@
+---
+// 本棚: 「本の情報」の書名が入っている記事を表紙で並べる
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { getPosts, postUrl, formatDate, stars } from '../../lib/blog';
+
+const books = (await getPosts())
+  .filter((p) => p.data.book)
+  .map((p) => ({ url: postUrl(p), date: p.data.date, ...p.data.book! }));
+---
+<BlogLayout title="本棚">
+  <h1 class="list-title">📚 本棚</h1>
+
+  {books.length === 0 ? (
+    <p>まだ本の感想はありません。</p>
+  ) : (
+    <>
+      <p class="sort">
+        並べ替え:
+        <button type="button" data-sort="date" aria-pressed="true">読んだ順</button>
+        <button type="button" data-sort="rating" aria-pressed="false">評価順</button>
+        <button type="button" data-sort="author" aria-pressed="false">著者順</button>
+      </p>
+      <ul class="shelf">
+        {books.map((b, i) => (
+          <li data-date={i} data-rating={b.rating ?? 0} data-author={b.author ?? ''}>
+            <a href={b.url}>
+              {b.cover
+                ? <img src={b.cover} alt="" loading="lazy" decoding="async" />
+                : <span class="no-cover">{b.title}</span>}
+              <span class="title">{b.title}</span>
+              {b.author && <span class="author">{b.author}</span>}
+              {b.rating && <span class="rating" aria-label={`評価 ${b.rating} / 5`}>{stars(b.rating)}</span>}
+              <span class="date">{formatDate(b.date)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</BlogLayout>
+
+<script>
+  const shelf = document.querySelector('.shelf');
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.sort button');
+  const collator = new Intl.Collator('ja');
+  const compare = {
+    date: (a: HTMLElement, b: HTMLElement) => Number(a.dataset.date) - Number(b.dataset.date),
+    rating: (a: HTMLElement, b: HTMLElement) =>
+      Number(b.dataset.rating) - Number(a.dataset.rating) || Number(a.dataset.date) - Number(b.dataset.date),
+    author: (a: HTMLElement, b: HTMLElement) => {
+      // 著者なしは最後
+      if (!a.dataset.author !== !b.dataset.author) return a.dataset.author ? -1 : 1;
+      return collator.compare(a.dataset.author!, b.dataset.author!) || Number(a.dataset.date) - Number(b.dataset.date);
+    },
+  };
+  for (const btn of buttons) {
+    btn.addEventListener('click', () => {
+      const items = [...shelf!.children] as HTMLElement[];
+      items.sort(compare[btn.dataset.sort as keyof typeof compare]);
+      shelf!.append(...items);
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    });
+  }
+</script>
+
+<style>
+  .list-title { font-size: 1.1rem; margin-top: 0; }
+  .sort { font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sort button {
+    font: inherit; padding: 2px 12px; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--text);
+  }
+  .sort button[aria-pressed='true'] { border-color: var(--link); background: #eef0ff; }
+  .shelf {
+    list-style: none; padding: 0; margin: 16px 0 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px 16px;
+  }
+  .shelf a { display: flex; flex-direction: column; gap: 2px; color: var(--text); text-decoration: none; }
+  .shelf img, .no-cover {
+    width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 3px;
+    background: var(--line); margin-bottom: 6px;
+  }
+  .no-cover {
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 8px; box-sizing: border-box; font-size: 0.85rem; font-weight: bold; overflow: hidden;
+  }
+  .title { font-weight: bold; font-size: 0.9rem; line-height: 1.4; }
+  .shelf a:hover .title { text-decoration: underline; }
+  .author, .date { font-size: 0.8rem; color: var(--muted); }
+  .rating { font-size: 0.8rem; color: #e0a000; letter-spacing: 1px; }
+</style>

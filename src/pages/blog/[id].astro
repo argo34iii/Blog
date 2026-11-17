@@ -2,6 +2,7 @@
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import { render } from 'astro:content';
 import Feedback from '../../components/Feedback.astro';
+import BookCard from '../../components/BookCard.astro';
 import { getPosts, formatDate, postUrl, categoryUrl } from '../../lib/blog';
 
 export async function getStaticPaths() {
@@ -20,8 +21,9 @@ const { Content } = await render(post);
   <article>
     <p class="meta">{formatDate(post.data.date)}</p>
     <h1 class="post-title">{post.data.title}</h1>
+    {post.data.book && <BookCard book={post.data.book} />}
     <div class="post-body"><Content /></div>
-    <p class="meta">カテゴリー: <a href={categoryUrl(post.data.category)}>{post.data.category}</a></p>
+    <p class="meta cats">カテゴリー: {post.data.categories.map((c) => <a href={categoryUrl(c)}>{c}</a>)}</p>
   </article>
 
   <Feedback slug={post.id} />
@@ -35,6 +37,7 @@ const { Content } = await render(post);
 <style>
   .post-title { font-size: 1.5rem; margin: 0 0 16px; }
   .post-body { margin-bottom: 24px; }
+  .cats { display: flex; flex-wrap: wrap; gap: 0 10px; }
   .post-body :global(.post-image) { display: block; max-width: 100%; height: auto; margin: 12px 0; }
   .post-body :global(.post-images) { margin-top: 24px; }
   .post-nav {

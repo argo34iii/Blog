@@ -25,6 +25,7 @@ export const monthLabel = (key: string) => {
 
 export const postUrl = (p: Post) => `/blog/${p.id}/`;
 export const categoryUrl = (c: string) => `/blog/category/${encodeURIComponent(c)}/`;
+export const BOOKS_URL = '/blog/books/';
 export const archiveUrl = (key: string) => `/blog/archive/${key}/`;
 
 // 本文から抜粋を作る（Markdown記法をざっくり除去）
@@ -45,12 +46,14 @@ export function countBy<T>(items: T[], key: (t: T) => string): [string, number][
   return [...map.entries()];
 }
 
-// 記事のサムネイル: 本文で最初に出てくる画像。なければ「画像」欄の1枚目。どちらもなければ undefined
+// 記事のサムネイル: 本文で最初に出てくる画像。なければ「画像」欄の1枚目、本の表紙。どれもなければ undefined
 const MD_IMAGE = /!\[[^\]]*\]\(\s*<?([^)\s>]+)/;
 const isUsableSrc = (s: unknown): s is string => typeof s === 'string' && /^(\/|https?:\/\/)/.test(s);
 
 export function thumbnail(p: Post): string | undefined {
   const fromBody = (p.body ?? '').match(MD_IMAGE)?.[1];
   if (isUsableSrc(fromBody)) return fromBody;
-  return p.data.images.find(isUsableSrc);
+  return p.data.images.find(isUsableSrc) ?? (isUsableSrc(p.data.book?.cover) ? p.data.book.cover : undefined);
 }
+
+export const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');

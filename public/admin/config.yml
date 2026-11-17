@@ -24,14 +24,35 @@ collections:
     create: true
     # URLは投稿日時から自動で付ける（例: /blog/20261104-2230/）
     slug: "{{year}}{{month}}{{day}}-{{hour}}{{minute}}"
-    sortable_fields: [date, title, category]
+    sortable_fields: [date, title]
     # 管理画面の記事一覧での表示（タイトルが空でも日付で見分けられるように）
     summary: "{{date}}　{{title}}"
     fields:
       # 空欄のままなら、サイト側で「日記　YYYYMMDD」（日付欄の日付）になる
       - { name: title, label: タイトル（空欄で「日記　日付」）, widget: string, required: false }
       - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
-      - { name: category, label: カテゴリー, widget: string, default: 雑記 }
+      # 複数選択できるプルダウン。カテゴリーを増やすときは options に足す
+      - name: category
+        label: カテゴリー
+        widget: select
+        multiple: true
+        options: [雑記, お知らせ, 本の感想]
+        default: [雑記]
+      # 本の感想を書くときだけ使う。書名を入れた記事が本棚ページ（/blog/books/）に並ぶ
+      - name: book
+        label: 本の情報（本の感想のときだけ）
+        widget: object
+        required: false
+        fields:
+          - { name: title, label: 書名, widget: string, required: false }
+          - { name: author, label: 著者, widget: string, required: false }
+          - { name: rating, label: 評価（1〜5）, widget: select, required: false, options: [1, 2, 3, 4, 5] }
+          - name: cover
+            label: 表紙画像
+            widget: image
+            required: false
+            media_folder: /public/images/{{year}}{{month}}{{day}}
+            public_folder: /images/{{year}}{{month}}{{day}}
       # 本文ツールバーの画像ボタン（photo.js）で追加した画像。記事の日付のフォルダに保存される
       - name: uploads
         label: 画像

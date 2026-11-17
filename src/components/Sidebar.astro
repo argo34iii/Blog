@@ -1,12 +1,12 @@
 ---
 import {
-  getPosts, postUrl, categoryUrl, archiveUrl,
+  getPosts, postUrl, categoryUrl, archiveUrl, BOOKS_URL,
   monthKey, monthLabel, countBy,
 } from '../lib/blog';
 
 const posts = await getPosts();
 const recent = posts.slice(0, 5);
-const categories = countBy(posts, (p) => p.data.category)
+const categories = countBy(posts.flatMap((p) => p.data.categories), (c) => c)
   .sort((a, b) => a[0].localeCompare(b[0], 'ja'));
 const months = countBy(posts, (p) => monthKey(p.data.date))
   .sort((a, b) => b[0].localeCompare(a[0]));
@@ -17,6 +17,12 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
     <p><strong>gmii</strong><br />ゲームプログラマ</p>
     <p><a href="/">ホームページ</a></p>
   </section>
+
+  {posts.some((p) => p.data.book) && (
+    <section>
+      <p><a href={BOOKS_URL}>📚 本棚</a></p>
+    </section>
+  )}
 
   <section>
     <h2>最近の記事</h2>
