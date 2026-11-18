@@ -75,5 +75,20 @@ collections:
 
           退勤時間: 
 
-
-
+  # サイト全体の設定（1つのファイルを編集する）
+  - name: settings
+    label: サイト設定
+    files:
+      - name: profile
+        label: プロフィール
+        file: src/data/profile.json
+        fields:
+          - name: icon
+            label: アイコン画像
+            widget: image
+            required: false
+            media_folder: /public/images/profile
+            public_folder: /images/profile
+          - { name: name, label: 名前, widget: string }
+          - { name: role, label: 肩書き, widget: string, required: false }
+          - { name: bio, label: 自己紹介（任意）, widget: text, required: false }

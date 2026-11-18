@@ -3,6 +3,8 @@ import {
   getPosts, postUrl, categoryUrl, archiveUrl, BOOKS_URL,
   monthKey, monthLabel, countBy,
 } from '../lib/blog';
+// 管理画面の「サイト設定 → プロフィール」で編集する
+import profile from '../data/profile.json';
 
 const posts = await getPosts();
 const recent = posts.slice(0, 5);
@@ -14,7 +16,11 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
 <aside class="sidebar">
   <section>
     <h2>プロフィール</h2>
-    <p><strong>gmii</strong><br />ゲームプログラマ</p>
+    <div class="profile">
+      {profile.icon && <img class="icon" src={profile.icon} alt="" width="64" height="64" />}
+      <p><strong>{profile.name}</strong>{profile.role && <><br />{profile.role}</>}</p>
+    </div>
+    {profile.bio && <p class="bio">{profile.bio}</p>}
     <p><a href="/">ホームページ</a></p>
   </section>
 
@@ -51,4 +57,8 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
   section { margin-bottom: 28px; }
   ul { margin: 0; padding-left: 1.2em; }
   p { margin: 0 0 8px; }
+  .profile { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .profile p { margin: 0; }
+  .icon { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: none; background: var(--line); }
+  .bio { white-space: pre-wrap; }
 </style>
