@@ -21,14 +21,14 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
       <p><strong>{profile.name}</strong>{profile.role && <><br />{profile.role}</>}</p>
     </div>
     {profile.bio && <p class="bio">{profile.bio}</p>}
-    <p><a href="/">ホームページ</a></p>
   </section>
 
-  {posts.some((p) => p.data.book) && (
-    <section>
-      <p><a href={BOOKS_URL}>📚 本棚</a></p>
-    </section>
-  )}
+  <section>
+    <ul class="links">
+      <li><a href="/">ホームページ</a></li>
+      {posts.some((p) => p.data.book) && <li><a href={BOOKS_URL}>📚 本棚</a></li>}
+    </ul>
+  </section>
 
   <section>
     <h2>最近の記事</h2>
@@ -61,4 +61,5 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
   .profile p { margin: 0; }
   .icon { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: none; background: var(--line); }
   .bio { white-space: pre-wrap; }
+  .links { list-style: none; padding: 0; }
 </style>
