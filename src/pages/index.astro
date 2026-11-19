@@ -1,8 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+// 管理画面の「サイト設定 → プロフィール」の名前を使う
+import profile from '../data/profile.json';
 ---
-<Base title="gmii">
-  <h1>gmii</h1>
+<Base title={profile.name}>
+  <h1>{profile.name}</h1>
 
   <p><a href="/blog/">ブログ</a></p>
 
