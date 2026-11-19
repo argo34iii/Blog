@@ -79,6 +79,17 @@ collections:
   - name: settings
     label: サイト設定
     files:
+      - name: blog
+        label: ブログ
+        file: src/data/blog.json
+        fields:
+          - name: headerImage
+            label: ヘッダー画像（横長。空欄ならブログ名の文字だけ）
+            widget: image
+            required: false
+            media_folder: /public/images/header
+            public_folder: /images/header
+          - { name: showTitleOnHeader, label: 画像の上にブログ名を表示する, widget: boolean, default: true }
       - name: profile
         label: プロフィール
         file: src/data/profile.json
