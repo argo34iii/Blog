@@ -1,10 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
-// 管理画面の「サイト設定 → プロフィール」の名前を使う
-import profile from '../data/profile.json';
+// 管理画面の「サイト設定 → ホームページ」で編集する
+import home from '../data/home.json';
 ---
-<Base title={profile.name}>
-  <h1>{profile.name}</h1>
+<Base title={home.title}>
+  <h1>{home.title}</h1>
 
   <p><a href="/blog/">ブログ</a></p>
 

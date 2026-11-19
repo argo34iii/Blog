@@ -79,6 +79,11 @@ collections:
   - name: settings
     label: サイト設定
     files:
+      - name: home
+        label: ホームページ
+        file: src/data/home.json
+        fields:
+          - { name: title, label: タイトル（見出しとブラウザのタブに表示）, widget: string }
       - name: blog
         label: ブログ
         file: src/data/blog.json
