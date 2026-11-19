@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar.astro';
 import { BLOG_NAME } from '../lib/blog';
 // 管理画面の「サイト設定 → ブログ」で編集する
 import blog from '../data/blog.json';
+import profile from '../data/profile.json';
 
 const { title } = Astro.props;
 const pageTitle = title ? `${title} - ${BLOG_NAME}` : BLOG_NAME;
@@ -31,7 +32,7 @@ const pageTitle = title ? `${title} - ${BLOG_NAME}` : BLOG_NAME;
   </div>
 
   <footer class="blog-footer">
-    <p>©{new Date().getFullYear()} gmii</p>
+    <p>©{new Date().getFullYear()} {profile.name}</p>
     <p><a href="#">トップへ戻る</a></p>
   </footer>
 </Base>
