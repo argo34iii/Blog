@@ -88,6 +88,7 @@ collections:
         label: ブログ
         file: src/data/blog.json
         fields:
+          - { name: title, label: ブログ名, widget: string }
           - name: headerImage
             label: ヘッダー画像（横長。空欄ならブログ名の文字だけ）
             widget: image

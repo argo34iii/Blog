@@ -2,7 +2,9 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export type Post = CollectionEntry<'blog'>;
 
-export const BLOG_NAME = 'デ';
+// 管理画面の「サイト設定 → ブログ」で編集する
+import blogSettings from '../data/blog.json';
+export const BLOG_NAME = blogSettings.title;
 export const PER_PAGE = 10;
 
 export async function getPosts(): Promise<Post[]> {
