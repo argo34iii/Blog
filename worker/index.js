@@ -57,7 +57,7 @@ async function sha256(text) {
 
 // 存在する記事にだけ書き込めるようにする
 async function postExists(env, url, slug) {
-  const res = await env.ASSETS.fetch(new URL(`/blog/${slug}/`, url));
+  const res = await env.ASSETS.fetch(new URL(`/${slug}/`, url));
   return res.ok;
 }
 
@@ -260,6 +260,12 @@ async function handleApi(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // ブログを /blog/ 配下からサイトの直下に移したので、古い URL は新しい URL へ転送する
+    if (url.pathname === '/blog' || url.pathname.startsWith('/blog/')) {
+      const to = new URL(url);
+      to.pathname = url.pathname.slice('/blog'.length) || '/';
+      return Response.redirect(to.toString(), 301);
+    }
     if (url.pathname.startsWith('/api/')) {
       try {
         return await handleApi(request, env, ctx);

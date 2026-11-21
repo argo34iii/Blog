@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "dev:home": "SITE_TARGET=home astro dev",
     "build": "astro build",
+    "build:home": "SITE_TARGET=home astro build && rm -rf dist-home/admin",
     "preview": "astro preview"
   },
   "dependencies": {

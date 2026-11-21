@@ -22,7 +22,7 @@ collections:
     label_singular: 記事
     folder: src/content/blog
     create: true
-    # URLは投稿日時から自動で付ける（例: /blog/20261104-2230/）
+    # URLは投稿日時から自動で付ける（例: /20261104-2230/）
     slug: "{{year}}{{month}}{{day}}-{{hour}}{{minute}}"
     sortable_fields: [date, title]
     # 管理画面の記事一覧での表示（タイトルが空でも日付で見分けられるように）
@@ -38,7 +38,7 @@ collections:
         multiple: true
         options: [雑記, お知らせ, 本の感想]
         default: [雑記]
-      # 本の感想を書くときだけ使う。書名を入れた記事が本棚ページ（/blog/books/）に並ぶ
+      # 本の感想を書くときだけ使う。書名を入れた記事が本棚ページ（/books/）に並ぶ
       - name: book
         label: 本の情報（本の感想のときだけ）
         widget: object
@@ -79,6 +79,12 @@ collections:
   - name: settings
     label: サイト設定
     files:
+      - name: sites
+        label: URL（独自ドメインを付けたときに変える）
+        file: src/data/sites.json
+        fields:
+          - { name: homeUrl, label: ホームページのURL, widget: string, pattern: ['^https?://[^/]+$', '末尾の / なしで https:// から入力'] }
+          - { name: blogUrl, label: ブログのURL, widget: string, pattern: ['^https?://[^/]+$', '末尾の / なしで https:// から入力'] }
       - name: home
         label: ホームページ
         file: src/data/home.json

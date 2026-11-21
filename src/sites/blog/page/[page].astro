@@ -6,7 +6,7 @@ import { getPosts, PER_PAGE } from '../../../lib/blog';
 export async function getStaticPaths() {
   const posts = await getPosts();
   const lastPage = Math.ceil(posts.length / PER_PAGE);
-  // 1ページ目は /blog/ なので 2 ページ目から作る
+  // 1ページ目は / なので 2 ページ目から作る
   return Array.from({ length: Math.max(0, lastPage - 1) }, (_, i) => {
     const page = i + 2;
     return {

@@ -1,0 +1,19 @@
+{
+  "name": "home",
+  "main": "./worker/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist-home",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // /api/ だけ Worker で処理し、それ以外は静的ファイルを直接返す
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "blog-db",
+      "database_id": "eee09fe4-16c2-4178-a5bc-e93c6e14e7c0"
+    }
+  ]
+}

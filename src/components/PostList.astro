@@ -7,7 +7,7 @@ interface Props {
   lastPage?: number;
 }
 const { posts, currentPage = 1, lastPage = 1 } = Astro.props;
-const pageUrl = (n: number) => (n === 1 ? '/blog/' : `/blog/page/${n}/`);
+const pageUrl = (n: number) => (n === 1 ? '/' : `/page/${n}/`);
 ---
 {posts.length === 0 && <p>記事はまだありません。</p>}
 

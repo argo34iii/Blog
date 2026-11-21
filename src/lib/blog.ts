@@ -24,10 +24,10 @@ export const monthLabel = (key: string) => {
   return `${y}年${Number(m)}月`;
 };
 
-export const postUrl = (p: Post) => `/blog/${p.id}/`;
-export const categoryUrl = (c: string) => `/blog/category/${encodeURIComponent(c)}/`;
-export const BOOKS_URL = '/blog/books/';
-export const archiveUrl = (key: string) => `/blog/archive/${key}/`;
+export const postUrl = (p: Post) => `/${p.id}/`;
+export const categoryUrl = (c: string) => `/category/${encodeURIComponent(c)}/`;
+export const BOOKS_URL = '/books/';
+export const archiveUrl = (key: string) => `/archive/${key}/`;
 
 // 本文から抜粋を作る（Markdown記法をざっくり除去）
 export function excerpt(p: Post, length = 120): string {

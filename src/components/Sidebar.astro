@@ -5,6 +5,7 @@ import {
 } from '../lib/blog';
 // 管理画面の「サイト設定 → プロフィール」で編集する
 import profile from '../data/profile.json';
+import sites from '../data/sites.json';
 
 const posts = await getPosts();
 const recent = posts.slice(0, 5);
@@ -25,7 +26,7 @@ const months = countBy(posts, (p) => monthKey(p.data.date))
 
   <section>
     <ul class="links">
-      <li><a href="/">ホームページ</a></li>
+      <li><a href={sites.homeUrl}>ホームページ</a></li>
       {posts.some((p) => p.data.book) && <li><a href={BOOKS_URL}>📚 本棚</a></li>}
     </ul>
   </section>

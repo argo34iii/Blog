@@ -10,17 +10,17 @@ const { title } = Astro.props;
 const pageTitle = title ? `${title} - ${BLOG_NAME}` : BLOG_NAME;
 ---
 <Base title={pageTitle} wide>
-  <link slot="head" rel="alternate" type="application/rss+xml" title={BLOG_NAME} href="/blog/rss.xml" />
+  <link slot="head" rel="alternate" type="application/rss+xml" title={BLOG_NAME} href="/rss.xml" />
   {blog.headerImage ? (
     <header class="blog-header has-image">
-      <a class="banner" href="/blog/" aria-label={BLOG_NAME}>
+      <a class="banner" href="/" aria-label={BLOG_NAME}>
         <img src={blog.headerImage} alt="" />
         {blog.showTitleOnHeader && <span class="blog-title">{BLOG_NAME}</span>}
       </a>
     </header>
   ) : (
     <header class="blog-header">
-      <a class="blog-title" href="/blog/">{BLOG_NAME}</a>
+      <a class="blog-title" href="/">{BLOG_NAME}</a>
     </header>
   )}
 

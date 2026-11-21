@@ -6,8 +6,8 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    // /api/ だけ Worker で処理し、それ以外は静的ファイルを直接返す
-    "run_worker_first": ["/api/*"]
+    // /api/ と、古い /blog/ の URL の転送だけ Worker で処理し、それ以外は静的ファイルを直接返す
+    "run_worker_first": ["/api/*", "/blog", "/blog/*"]
   },
   "d1_databases": [
     {
