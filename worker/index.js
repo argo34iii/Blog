@@ -1,6 +1,7 @@
 // /api/* だけをここで処理し、それ以外は静的サイト（dist）をそのまま返す。
 // コメントと投票、お問い合わせは D1（Cloudflare の無料DB）に保存する。
-// お問い合わせは Discord の Webhook（シークレット DISCORD_WEBHOOK_URL）にも通知する。
+// お問い合わせは Discord の Webhook（シークレット DISCORD_WEBHOOK_URL）と、
+// Resend 経由のメール（シークレット RESEND_API_KEY / CONTACT_EMAIL）にも通知する。
 
 // Feedback.astro のボタンと同じ並び
 export const REACTIONS = ['useful', 'moved', 'alive', 'motto', 'someday'];
@@ -109,6 +110,29 @@ async function notifyDiscord(env, { name, replyTo, body, createdAt }) {
   return res.ok;
 }
 
+const EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+
+// Resend の無料枠（独自ドメインなし）は、Resend に登録したメールアドレス宛てにだけ送れる
+async function notifyEmail(env, { name, replyTo, body, createdAt }) {
+  if (!env.RESEND_API_KEY || !env.CONTACT_EMAIL) return false;
+  const when = new Date(createdAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+  // RESEND_API_BASE はローカルテスト用（普段は未設定）
+  const res = await fetch(`${env.RESEND_API_BASE || 'https://api.resend.com'}/emails`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      from: 'ホームページのお問い合わせ <onboarding@resend.dev>',
+      to: [env.CONTACT_EMAIL],
+      // 返信先がメールアドレスなら、そのまま「返信」で相手に返せるようにする
+      ...(EMAIL_RE.test(replyTo) ? { reply_to: replyTo } : {}),
+      subject: `【お問い合わせ】${name}`.slice(0, 200),
+      text: `ホームページからお問い合わせが届きました。\n\nお名前: ${name}\n返信先: ${replyTo}\n日時: ${when}\n\n${body}\n`,
+    }),
+  });
+  if (!res.ok) console.error('resend failed', res.status, await res.text().catch(() => ''));
+  return res.ok;
+}
+
 async function handleContact(request, env, ctx) {
   if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405);
   let input;
@@ -150,11 +174,13 @@ async function handleContact(request, env, ctx) {
     .run();
 
   // 通知は返事を待たせないよう裏で送る。失敗しても DB には残っている
+  const message = { name, replyTo, body, createdAt };
   ctx.waitUntil(
-    notifyDiscord(env, { name, replyTo, body, createdAt })
+    notifyDiscord(env, message)
       .then((ok) => ok && db.prepare(`UPDATE contacts SET notified = 1 WHERE id = ?`).bind(meta.last_row_id).run())
-      .catch((e) => console.error('notify error', e)),
+      .catch((e) => console.error('discord notify error', e)),
   );
+  ctx.waitUntil(notifyEmail(env, message).catch((e) => console.error('email notify error', e)));
   return json({ ok: true });
 }
 
