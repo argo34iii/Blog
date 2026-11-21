@@ -1,5 +1,6 @@
 // /api/* だけをここで処理し、それ以外は静的サイト（dist）をそのまま返す。
-// コメントと投票は D1（Cloudflare の無料DB）に保存する。
+// コメントと投票、お問い合わせは D1（Cloudflare の無料DB）に保存する。
+// お問い合わせは Discord の Webhook（シークレット DISCORD_WEBHOOK_URL）にも通知する。
 
 // Feedback.astro のボタンと同じ並び
 export const REACTIONS = ['useful', 'moved', 'alive', 'motto', 'someday'];
@@ -22,6 +23,15 @@ async function ensureSchema(db) {
       ip_hash TEXT NOT NULL
     )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS comments_slug ON comments(slug, id)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      reply_to TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      ip_hash TEXT NOT NULL,
+      notified INTEGER NOT NULL DEFAULT 0
+    )`),
     db.prepare(`CREATE TABLE IF NOT EXISTS reactions (
       slug TEXT NOT NULL,
       kind TEXT NOT NULL,
@@ -65,8 +75,92 @@ async function getState(db, slug, voter) {
   };
 }
 
-async function handleApi(request, env) {
+const CONTACT = {
+  maxName: 50,
+  maxReplyTo: 200,
+  maxBody: 3000,
+  intervalSec: 60, // 同じ人の連続送信を防ぐ
+  perDay: 5, // 同じ人から1日に受け付ける件数
+};
+
+async function notifyDiscord(env, { name, replyTo, body, createdAt }) {
+  if (!env.DISCORD_WEBHOOK_URL) return false;
+  const res = await fetch(env.DISCORD_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      username: 'ホームページのお問い合わせ',
+      allowed_mentions: { parse: [] }, // 本文の @everyone などで通知が飛ばないように
+      embeds: [
+        {
+          title: '📮 お問い合わせが届きました',
+          description: body.slice(0, 4000),
+          color: 0x4a6cf7,
+          fields: [
+            { name: 'お名前', value: name.slice(0, 1024), inline: true },
+            { name: '返信先', value: replyTo.slice(0, 1024), inline: true },
+          ],
+          timestamp: createdAt,
+        },
+      ],
+    }),
+  });
+  if (!res.ok) console.error('discord webhook failed', res.status, await res.text().catch(() => ''));
+  return res.ok;
+}
+
+async function handleContact(request, env, ctx) {
+  if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405);
+  let input;
+  try {
+    input = await request.json();
+  } catch {
+    return json({ error: 'bad json' }, 400);
+  }
+  // website はボット用の罠（人には見えない欄）。入っていたら黙って成功扱い
+  if (input.website) return json({ ok: true });
+
+  const name = String(input.name || '').trim().slice(0, CONTACT.maxName) || '（未記入）';
+  const replyTo = String(input.replyTo || '').trim().slice(0, CONTACT.maxReplyTo) || '（未記入）';
+  const body = String(input.body || '').trim();
+  if (!body) return json({ error: '内容を入力してください' }, 400);
+  if (body.length > CONTACT.maxBody) return json({ error: `内容は${CONTACT.maxBody}文字までです` }, 400);
+
+  const db = env.DB;
+  await ensureSchema(db);
+  const ip = request.headers.get('cf-connecting-ip') || '';
+  const ipHash = await sha256(`contact:${ip}`);
+  const now = Date.now();
+  const recent = await db
+    .prepare(
+      `SELECT
+         SUM(created_at > ?) AS last_minute,
+         SUM(created_at > ?) AS last_day
+       FROM contacts WHERE ip_hash = ?`,
+    )
+    .bind(new Date(now - CONTACT.intervalSec * 1000).toISOString(), new Date(now - 86400000).toISOString(), ipHash)
+    .first();
+  if (recent?.last_minute > 0) return json({ error: '少し時間をおいてから送信してください' }, 429);
+  if (recent?.last_day >= CONTACT.perDay) return json({ error: '本日はこれ以上送信できません' }, 429);
+
+  const createdAt = new Date(now).toISOString();
+  const { meta } = await db
+    .prepare(`INSERT INTO contacts (name, reply_to, body, created_at, ip_hash) VALUES (?, ?, ?, ?, ?)`)
+    .bind(name, replyTo, body, createdAt, ipHash)
+    .run();
+
+  // 通知は返事を待たせないよう裏で送る。失敗しても DB には残っている
+  ctx.waitUntil(
+    notifyDiscord(env, { name, replyTo, body, createdAt })
+      .then((ok) => ok && db.prepare(`UPDATE contacts SET notified = 1 WHERE id = ?`).bind(meta.last_row_id).run())
+      .catch((e) => console.error('notify error', e)),
+  );
+  return json({ ok: true });
+}
+
+async function handleApi(request, env, ctx) {
   const url = new URL(request.url);
+  if (url.pathname === '/api/contact') return handleContact(request, env, ctx);
   const m = url.pathname.match(/^\/api\/posts\/([^/]+)(?:\/(comments|reactions))?\/?$/);
   if (!m) return json({ error: 'not found' }, 404);
   const [, slug, action] = m;
@@ -138,11 +232,11 @@ async function handleApi(request, env) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) {
       try {
-        return await handleApi(request, env);
+        return await handleApi(request, env, ctx);
       } catch (e) {
         console.error(e);
         return json({ error: 'サーバでエラーが起きました' }, 500);

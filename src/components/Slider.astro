@@ -1,0 +1,92 @@
+---
+// 画像を一定間隔で横にスライドさせる。指でスワイプ、点で直接移動もできる
+interface Props {
+  images: string[];
+  interval?: number; // 秒
+}
+const { images, interval = 5 } = Astro.props;
+---
+{images.length > 0 && (
+  <section class="slider" data-interval={interval} aria-roledescription="carousel" aria-label="スライドショー">
+    <div class="track" tabindex="0">
+      {images.map((src, i) => (
+        <div class="slide" aria-roledescription="slide" aria-label={`${i + 1} / ${images.length}`}>
+          <img src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+        </div>
+      ))}
+    </div>
+    {images.length > 1 && (
+      <div class="dots">
+        {images.map((_, i) => (
+          <button type="button" aria-label={`${i + 1}枚目を表示`} aria-current={i === 0 ? 'true' : 'false'} />
+        ))}
+      </div>
+    )}
+  </section>
+)}
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('.slider')) {
+    const track = root.querySelector<HTMLElement>('.track')!;
+    const slides = [...track.children] as HTMLElement[];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('.dots button')];
+    if (slides.length < 2) continue;
+
+    const intervalMs = Number(root.dataset.interval || 5) * 1000;
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let index = 0;
+    let timer: number | undefined;
+    let paused = false;
+
+    const go = (i: number, smooth = true) => {
+      index = (i + slides.length) % slides.length;
+      track.scrollTo({ left: slides[index].offsetLeft - track.offsetLeft, behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
+    };
+    const markDot = () => dots.forEach((d, i) => d.setAttribute('aria-current', String(i === index)));
+
+    // スワイプなどで位置が変わったら、表示中の番号を合わせる
+    track.addEventListener('scroll', () => {
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== index) {
+        index = i;
+        restart();
+      }
+      markDot();
+    }, { passive: true });
+
+    const restart = () => {
+      clearInterval(timer);
+      if (!paused && !reduceMotion) timer = window.setInterval(() => go(index + 1), intervalMs);
+    };
+
+    dots.forEach((d, i) => d.addEventListener('click', () => { go(i); restart(); }));
+    root.addEventListener('mouseenter', () => { paused = true; restart(); });
+    root.addEventListener('mouseleave', () => { paused = false; restart(); });
+    root.addEventListener('focusin', () => { paused = true; restart(); });
+    root.addEventListener('focusout', () => { paused = false; restart(); });
+    document.addEventListener('visibilitychange', () => { paused = document.hidden; restart(); });
+    addEventListener('resize', () => go(index, false));
+    restart();
+  }
+</script>
+
+<style>
+  .slider { margin: 0 0 24px; }
+  .track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    border-radius: 6px;
+    background: var(--line);
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .slide { flex: 0 0 100%; scroll-snap-align: start; aspect-ratio: 16 / 9; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dots { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+  .dots button {
+    width: 10px; height: 10px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--muted); background: transparent; cursor: pointer;
+  }
+  .dots button[aria-current='true'] { background: var(--text); border-color: var(--text); }
+</style>

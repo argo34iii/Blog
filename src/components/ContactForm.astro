@@ -1,0 +1,64 @@
+---
+// お問い合わせフォーム。送信先は /api/contact（worker/index.js）→ Discord に通知
+---
+<section class="contact">
+  <h2>お問い合わせ</h2>
+  <form>
+    <label>お名前（任意）
+      <input name="name" maxlength="50" autocomplete="name" />
+    </label>
+    <label>返信先（任意・メールアドレスやSNSのIDなど）
+      <input name="replyTo" maxlength="200" autocomplete="email" />
+    </label>
+    <label class="trap" aria-hidden="true">website
+      <input name="website" tabindex="-1" autocomplete="off" />
+    </label>
+    <label>内容
+      <textarea name="body" rows="6" maxlength="3000" required></textarea>
+    </label>
+    <button type="submit">送信する</button>
+    <p class="status" role="status"></p>
+  </form>
+</section>
+
+<script>
+  for (const form of document.querySelectorAll<HTMLFormElement>('.contact form')) {
+    const status = form.querySelector('.status')!;
+    const button = form.querySelector('button')!;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      button.disabled = true;
+      status.textContent = '送信中…';
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || '送信できませんでした');
+        form.reset();
+        status.textContent = '送信しました。ありがとうございます！';
+      } catch (err) {
+        status.textContent = (err as Error).message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--line); }
+  h2 { font-size: 1.1rem; }
+  form { display: grid; gap: 12px; }
+  label { display: grid; gap: 4px; font-size: 0.9rem; }
+  input, textarea {
+    font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px;
+    width: 100%; box-sizing: border-box;
+  }
+  button { justify-self: start; font: inherit; padding: 6px 20px; cursor: pointer; }
+  .trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .status { margin: 0; font-size: 0.85rem; color: var(--muted); min-height: 1.5em; }
+</style>

@@ -1,13 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
+import Slider from '../components/Slider.astro';
+import ContactForm from '../components/ContactForm.astro';
 // 管理画面の「サイト設定 → ホームページ」で編集する
 import home from '../data/home.json';
+
+const slides = (home.slides ?? []).filter((s) => typeof s === 'string' && s.startsWith('/'));
 ---
 <Base title={home.title}>
   <h1>{home.title}</h1>
+
+  <Slider images={slides} interval={home.slideInterval ?? 5} />
 
   <p><a href="/blog/">ブログ</a></p>
 
   <!-- リンクはここに足していく -->
   <!-- <p><a href="https://github.com/xxx">GitHub</a></p> -->
+
+  {home.showContactForm !== false && <ContactForm />}
 </Base>

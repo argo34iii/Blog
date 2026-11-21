@@ -84,6 +84,19 @@ collections:
         file: src/data/home.json
         fields:
           - { name: title, label: タイトル（見出しとブラウザのタブに表示）, widget: string }
+          - name: slides
+            label: スライドショーの画像（横長がおすすめ。空なら表示しない）
+            label_singular: 画像
+            widget: list
+            required: false
+            field:
+              name: image
+              label: 画像
+              widget: image
+              media_folder: /public/images/home
+              public_folder: /images/home
+          - { name: slideInterval, label: スライドの切り替え間隔（秒）, widget: number, value_type: int, min: 2, max: 30, default: 5 }
+          - { name: showContactForm, label: お問い合わせフォームを表示する, widget: boolean, default: true }
       - name: blog
         label: ブログ
         file: src/data/blog.json
