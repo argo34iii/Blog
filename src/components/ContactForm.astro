@@ -1,8 +1,7 @@
 ---
-// お問い合わせフォーム。送信先は /api/contact（worker/index.js）→ Discord に通知
+// お問い合わせフォーム。送信先は /api/contact（worker/index.js）→ Discord とメールに通知
 ---
 <section class="contact">
-  <h2>お問い合わせ</h2>
   <form>
     <label>お名前（任意）
       <input name="name" maxlength="50" autocomplete="name" />
@@ -50,8 +49,6 @@
 </script>
 
 <style>
-  .contact { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--line); }
-  h2 { font-size: 1.1rem; }
   form { display: grid; gap: 12px; }
   label { display: grid; gap: 4px; font-size: 0.9rem; }
   input, textarea {

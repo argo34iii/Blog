@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContactForm from '../../components/ContactForm.astro';
+// 管理画面の「サイト設定 → ホームページ」で編集する
+import home from '../../data/home.json';
+---
+<Base title={`お問い合わせ - ${home.title}`}>
+  <p><a href="/">← {home.title}</a></p>
+  <h1>お問い合わせ</h1>
+  {home.showContactForm !== false
+    ? <ContactForm />
+    : <p>現在お問い合わせは受け付けていません。</p>}
+</Base>

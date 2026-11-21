@@ -10,7 +10,10 @@ import sites from './src/data/sites.json' with { type: 'json' };
 const target = process.env.SITE_TARGET === 'home' ? 'home' : 'blog';
 
 const routes = {
-  home: [['/', 'index.astro']],
+  home: [
+    ['/', 'index.astro'],
+    ['/contact', 'contact.astro'],
+  ],
   blog: [
     ['/', 'index.astro'],
     ['/[id]', '[id].astro'],
