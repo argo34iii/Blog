@@ -1,6 +1,10 @@
 {
   "title": "Amiii",
-  "slides": [],
+  "slides": [
+    "/images/home/IMG_4142.webp",
+    "/images/home/IMG_3209.webp",
+    "/images/home/IMG_4135.webp"
+  ],
   "slideInterval": 5,
   "showContactForm": true
 }
